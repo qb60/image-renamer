@@ -8,14 +8,14 @@ from datetime import datetime
 # Define the output format as a constant
 OUTPUT_FORMAT = "IMG_{YYYY}{MM}{DD}_{hh}{mm}{ss}{suffix}"
 
-# Define patterns for different file name formats
+# Updated patterns without trailing dots and asterisks
 patterns = [
-    r'IMG{YYYY}{MM}{DD}{hh}{mm}{ss}.*',
-    r'IMG_{DD}-{MM}-{YYYY}_{hh}-{mm}-{ss}.*',
-    r'IMG_{YYYY}{MM}{DD}_{hh}{mm}{ss}.*',
-    r'PXL_{DD}-{MM}-{YYYY}_{hh}-{mm}-{ss}.*',
-    r'PXL_{YYYY}{MM}{DD}_{hh}{mm}{ss}.*',
-    r'SK_{YYYY}{MM}{DD}_{hh}{mm}{ss}.*'
+    r'IMG{YYYY}{MM}{DD}{hh}{mm}{ss}',
+    r'IMG_{DD}-{MM}-{YYYY}_{hh}-{mm}-{ss}',
+    r'IMG_{YYYY}{MM}{DD}_{hh}{mm}{ss}',
+    r'PXL_{DD}-{MM}-{YYYY}_{hh}-{mm}-{ss}',
+    r'PXL_{YYYY}{MM}{DD}_{hh}{mm}{ss}',
+    r'SK_{YYYY}{MM}{DD}_{hh}{mm}{ss}'
 ]
 
 def create_regex_pattern(pattern):
@@ -25,7 +25,7 @@ def create_regex_pattern(pattern):
         '{DD}', r'(?P<DD>\d{2})').replace(
         '{hh}', r'(?P<hh>\d{2})').replace(
         '{mm}', r'(?P<mm>\d{2})').replace(
-        '{ss}', r'(?P<ss>\d{2})')
+        '{ss}', r'(?P<ss>\d{2})') + r'.*'  # Add '.*' at the end to match any trailing characters
 
 # Convert human-readable patterns to regex patterns
 regex_patterns = [create_regex_pattern(pattern) for pattern in patterns]

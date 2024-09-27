@@ -4,7 +4,7 @@ A simple Python script to rename image files based on their timestamp informatio
 
 ## Description
 
-This script renames image files in the current directory to a standardized format: `IMG_YYYYMMDD_HHMMSS.jpg`. It supports various input filename formats and handles potential naming conflicts by adding a numeric suffix when necessary.
+This script renames image files in the current directory to a standardized format: `IMG_YYYYMMDD_hhmmss.jpg`. It supports various input filename formats and handles potential naming conflicts by adding a numeric suffix when necessary.
 
 ## Usage
 
