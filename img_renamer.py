@@ -3,7 +3,6 @@
 
 import os
 import re
-from datetime import datetime
 
 OUTPUT_FORMAT = "IMG_{YYYY}{MM}{DD}_{hh}{mm}{ss}"
 
@@ -16,6 +15,7 @@ INPUT_FORMATS = [
     "SK_{YYYY}{MM}{DD}_{hh}{mm}{ss}"
 ]
 
+
 def create_regex_pattern(pattern):
     return (pattern.replace(
         '{YYYY}', r'(?P<YYYY>\d{4})').replace(
@@ -25,12 +25,18 @@ def create_regex_pattern(pattern):
         '{mm}', r'(?P<mm>\d{2})').replace(
         '{ss}', r'(?P<ss>\d{2})') + r'.*')  # Add '.*' at the end to match any trailing characters
 
-# Convert human-readable patterns to regex patterns
-regex_patterns = [create_regex_pattern(pattern) for pattern in INPUT_FORMATS]
+
+regex_input_patterns = [create_regex_pattern(pattern) for pattern in INPUT_FORMATS]
+regex_output_pattern = create_regex_pattern(OUTPUT_FORMAT)
+
 
 def rename_file(filename, existing_files):
     name, ext = os.path.splitext(filename)
-    for pattern in regex_patterns:
+
+    if re.match(regex_output_pattern, name):
+        return filename
+
+    for pattern in regex_input_patterns:
         match = re.match(pattern, name)
         if match:
             date_parts = match.groupdict()
@@ -44,12 +50,13 @@ def rename_file(filename, existing_files):
                 counter += 1
     return None
 
+
 def main():
     folder_path = '.'  # Current directory, change if needed
     renamed_count = 0
     skipped_count = 0
     existing_files = set(os.listdir(folder_path))
-    
+
     for filename in list(existing_files):
         if filename.lower().endswith('.jpg'):
             new_name = rename_file(filename, existing_files)
@@ -68,10 +75,11 @@ def main():
             else:
                 print(f"Skipped: {filename} (no match or already in correct format)")
                 skipped_count += 1
-    
+
     print(f"\nSummary:")
     print(f"Total files renamed: {renamed_count}")
     print(f"Total files skipped: {skipped_count}")
+
 
 if __name__ == "__main__":
     main()
