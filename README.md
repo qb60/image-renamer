@@ -4,18 +4,29 @@ A simple Python script to rename image files based on their timestamp informatio
 
 ## Description
 
-This script renames image files in the current directory to a standardized format: `IMG_YYYYMMDD_hhmmss.jpg`. It supports various input filename formats and handles potential naming conflicts by adding a numeric suffix when necessary.
+This script renames image files in the given directory to a standardized format: `IMG_YYYYMMDD_HHmmss.jpg`. It supports various input filename formats and handles potential naming conflicts by adding a numeric suffix when necessary. Also, it can take date timestamp from EXIF.
 
 ## Usage
+This script requires `exif` library, so it should be installed first:
+```commandline
+pip3 install --user exif 
+```
+Usage:
+```
+img_renamer.py [-h] [-e] [-u] [PATH]
 
-1. Place the `img-renamer.py` script in the directory containing the images you want to rename.
-2. Run the script:
-   ```
-   python3 img-renamer.py
-   ```
+positional arguments:
+  PATH                  path to files for renaming, current directory if not given
 
-The script will process all .jpg files in the current directory and rename them according to the specified format.
+options:
+  -h, --help               show this help message and exit
+  -e, --exif               take data from exif for all files
+  -u, --exif-for-unknown   take data from exif for files with unknown name format only
+```
+
+The script will process .jpg files in the given directory and rename them according to the specified format.
 
 ## Requirements
 
 - Python 3.x
+- `exif` library
