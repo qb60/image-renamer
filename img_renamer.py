@@ -11,6 +11,7 @@ from exif import Image
 OUTPUT_FORMAT = "IMG_{YYYY}{MM}{DD}_{HH}{mm}{ss}"
 
 INPUT_FORMATS = [
+    "{YYYY}{MM}{DD}_{HH}{mm}{ss}",
     "IMG{YYYY}{MM}{DD}{HH}{mm}{ss}",
     "IMG_{DD}-{MM}-{YYYY}_{HH}-{mm}-{ss}",
     "IMG_{YYYY}{MM}{DD}_{HH}{mm}{ss}",
