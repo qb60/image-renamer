@@ -4,9 +4,8 @@
 import os
 import re
 import argparse
+import struct
 import sys
-
-from exif import Image
 
 OUTPUT_FORMAT = "IMG_{YYYY}{MM}{DD}_{HH}{mm}{ss}"
 
@@ -87,6 +86,63 @@ def convert_exif_date_to_date_parts(exif_date: str):
         return match.groupdict()
 
 
+def get_exif_date(jpg_data: bytes):
+    soi_marker = b"\xFF\xD8"
+    sos_marker = b"\xFF\xDA"
+    app1_marker = b"\xFF\xE1"
+    exif_marker = b"Exif\x00\x00"
+
+    if jpg_data[:2] != soi_marker:
+        return None
+
+    cur = 2
+    while cur < len(jpg_data):
+        if jpg_data[cur: cur + 2] == sos_marker:
+            return None
+
+        if jpg_data[cur: cur + 2] == app1_marker:
+            cur += 2
+            length = struct.unpack(">H", jpg_data[cur: cur + 2])[0]
+            app1_segment = jpg_data[cur + 2: cur + length]
+
+            if app1_segment[: len(exif_marker)] != exif_marker:
+                cur += length
+                continue
+
+            tiff_table = app1_segment[len(exif_marker):]
+
+            return get_date_from_tiff_table(tiff_table)
+        cur += 1
+    return "HAHA"
+
+
+def get_date_from_tiff_table(tiff_table: bytes):
+    big_endian_marker = b"\x4D\x4D"  # MM - Motorola
+    ifd_size = 12
+    datetime_tag = 0x0132
+    datetime_expected_size = 20
+
+    endian = ">" if tiff_table[0:2] == big_endian_marker else "<"
+    ifd_offset = struct.unpack(endian + "L", tiff_table[4:8])[0]
+    ifd_count = struct.unpack(endian + "H", tiff_table[ifd_offset: ifd_offset + 2])[0]
+    ifd_start = ifd_offset + 2
+    for i in range(ifd_count):
+        current_ifd_offset = ifd_start + i * ifd_size
+        tiff_tag = struct.unpack(endian + "H", tiff_table[current_ifd_offset: current_ifd_offset + 2])[0]
+        if tiff_tag != datetime_tag:
+            continue
+
+        datetime_size = struct.unpack(endian + "L", tiff_table[current_ifd_offset + 4:current_ifd_offset + 8])[0]
+        if datetime_size != datetime_expected_size:
+            return None
+
+        datetime_offset = struct.unpack(endian + "L", tiff_table[current_ifd_offset + 8:current_ifd_offset + 12])[0]
+        datetime_bytes = tiff_table[datetime_offset: datetime_offset + datetime_size]
+        return datetime_bytes.decode().strip('\x00')
+
+    return None
+
+
 class FsHandler:
     def __init__(self, path):
         self.path = path
@@ -99,9 +155,9 @@ class FsHandler:
 
     def get_exif_date(self, filename):
         with open(self.__get_full_path(filename), 'rb') as image_file:
-            image = Image(image_file)
-            if image.get("datetime"):
-                return convert_exif_date_to_date_parts(image.datetime)
+            datetime_str = get_exif_date(image_file.read())
+            if datetime_str is not None:
+                return convert_exif_date_to_date_parts(datetime_str)
             else:
                 return None
 
